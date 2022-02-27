@@ -1,6 +1,8 @@
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 var context = new AudioContext();
 
+var iosSleepPreventInterval = null;
+
 Sequencer = {}
 
 Sequencer.timeout = function(callback, length) {
@@ -36,12 +38,19 @@ function createNewSound(height, parent) {
 };
 Metronome.prototype = {
   start: function () {
+    iosSleepPreventInterval = setInterval(function () {
+      window.location.href = "/new/page";
+      window.setTimeout(function () {
+          window.stop()
+      }, 0);
+    }, 30000);
     if (this.stopped == true) {
       this.stopped = false;
       return this.mainLoop();
     }
   },
   stop: function () {
+    clearInterval(iosSleepPreventInterval);
     this.stopped = true;
     this.justStarted = true;
     window.clearTimeout(this.timeout);
