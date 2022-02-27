@@ -3,24 +3,27 @@ var context = new AudioContext();
 
 var iosSleepPreventInterval = null;
 
-Sequencer = {}
-
-Sequencer.timeout = function(callback, length) {
-  if (length <= 0) {
-    length = 1;
+Sequencer = {
+  timeout: function(callback, length) {
+    if (length <= 0) {
+      length = 1;
+    }
+    var source = context.createBufferSource();
+    source.buffer = context.createBuffer(1, 32000 * (length / 1000), 32000);
+    source.connect(context.destination);
+    source.onended = callback;
+    if (!source.stop) {
+      source.stop = source.noteOff;
+    }
+    if (!source.start) {
+      source.start = source.noteOn;
+    }
+    source.start(0)
+    return source;
+  },
+  clearTimeout: function(timeout){
+    timeout.stop(0);
   }
-  var source = context.createBufferSource();
-  source.buffer = context.createBuffer(1, 32000 * (length / 1000), 32000);
-  source.connect(context.destination);
-  source.onended = callback;
-  if (!source.stop) {
-    source.stop = source.noteOff;
-  }
-  if (!source.start) {
-    source.start = source.noteOn;
-  }
-  source.start(0)
-  return source;
 };
 
 function createNewSound(height, parent) {
